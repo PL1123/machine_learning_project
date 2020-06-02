@@ -27,7 +27,7 @@ library(randomForest)
 ```
 #### Loading Dataset 
 ```{r}
-setwd("D:/R/Practical Machine Learning/Practical-Machine-Learning-Project")
+setwd("D:/R/practical machine learning1/machine_learning_project")
 train <- read.csv('./pml-training.csv', header = TRUE)
 finalpredict_test <- read.csv('./pml-testing.csv', header = TRUE)
 #Raw dataset has 160 columns
@@ -59,7 +59,7 @@ names(train3[1:52])
 We will use two different prediction models and compare their accuracy to pick the best one (high accuracy, low out of sample error) for prediction.
 They will be random forest and gbm. 
 
-Cross validation is done with a cv of K = 3
+Cross validation is done with a cv of K = 3; error rate shown below
 ```{r}
 train_control <- trainControl(method = "cv", number = 3) 
 ```
@@ -81,10 +81,12 @@ cm_gbm <- confusionMatrix(pred_gbm, testing$classe)
 #accuracy
 cm_gbm$overall[1]
 ```
-Random forest model has a higher accuracy rate than gradient boosting model, so random forest model (99% accuracy) will be used to make prediction for the final testing data.
+Random forest model has a higher accuracy rate than gradient boosting model, so random forest model (99% accuracy) will be used to make prediction for the final testing data.The out of sample error rate is roughly 1%. 
 ```{r}
 #Importance of features used to predict
 fit_rf$finalModel$importance
+#Display final model 
+fit_rf$finalModel
 ```
 
 # FINAL PREDICTION 
