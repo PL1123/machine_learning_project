@@ -1,0 +1,97 @@
+---
+title: "Machine Learning Prediction Project"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction 
+This document aims to find the best model to predict one's activity from data collected by wearable devices such as Fitbit, Nike Fuelband. Data of how well these devices capture the actual activities is less frequently investigated. The present project utilizes data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants to predict their barbell lifting manners. They were asked to perform lifts correctly and incorrectly in 5 different ways, which were "exactly according to the specification (Class A), throwing the elbows to the front (Class B), lifting the dumbbell only halfway (Class C), lowering the dumbbell only halfway (Class D) and throwing the hips to the front (Class E)." Full reference can be found at: 
+Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. Qualitative Activity Recognition of Weight Lifting Exercises. Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13). Stuttgart, Germany: ACM SIGCHI, 2013.
+
+# Data Source 
+The training dataset comes from: 
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv. 
+The test (validation) dataset comes from https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv. 
+The test dataset will be used for final prediction.  
+
+# Data Preparation 
+#### Loading Packages
+```{r}
+library(caret)
+library(rpart)
+library(gbm)
+library(randomForest)
+```
+#### Loading Dataset 
+```{r}
+setwd("D:/R/Practical Machine Learning/Practical-Machine-Learning-Project")
+train <- read.csv('./pml-training.csv', header = TRUE)
+finalpredict_test <- read.csv('./pml-testing.csv', header = TRUE)
+#Raw dataset has 160 columns
+dim(train)
+```
+#### Data Partition 
+We need to columns with nonpredictors, NA values, or near zero covariate variables, before we start partition our dataset.
+```{r}
+#Setting a seed 
+set.seed(5847)
+#Removing columns with NA of train dataset
+train1 <- train[, colSums(is.na(train)) == 0]
+#Removing non-predictors columns
+train2 <- train1[, -c(1:7)]
+#Removing near zero covariate columns
+train3 <- train2[, -nearZeroVar(train2)]
+#Partition the train data to training (75%) and testing (25%) data.
+inTrain <- createDataPartition(y = train3$classe, p = 0.75, list = F)
+training <- train3[inTrain,] 
+testing <- train3[-inTrain,]
+```
+We have 52 predictor variables for the prediction models, after data partition. 
+```{r}
+dim(train3)
+names(train3[1:52])
+```
+
+# Prediction Models
+We will use two different prediction models and compare their accuracy to pick the best one (high accuracy, low out of sample error) for prediction.
+They will be random forest and gbm. 
+
+Cross validation is done with a cv of K = 3
+```{r}
+train_control <- trainControl(method = "cv", number = 3) 
+```
+#### Random Forest Model 
+```{r}
+fit_rf <- train(classe ~., method = "rf", data = training, trControl = train_control, ntree = 64) 
+#Evaluating accuracy using testing set
+pred_rf <- predict(fit_rf, testing)
+cm_rf <- confusionMatrix(pred_rf, testing$classe)
+#Accuracy
+cm_rf$overall[1]
+```
+#### Gradient Boosting Model
+```{r}
+fit_gbm <- train(classe ~., method = "gbm", data = training, trControl = train_control, verbose = FALSE)
+#Predicting using testing set
+pred_gbm <- predict(fit_gbm, testing)
+cm_gbm <- confusionMatrix(pred_gbm, testing$classe)
+#accuracy
+cm_gbm$overall[1]
+```
+Random forest model has a higher accuracy rate than gradient boosting model, so random forest model (99% accuracy) will be used to make prediction for the final testing data.
+```{r}
+#Importance of features used to predict
+fit_rf$finalModel$importance
+```
+
+# FINAL PREDICTION 
+```{r}
+predict(fit_rf, finalpredict_test)
+```
+
+# Conclusion 
+The random forest model is used with an accuracy > 99%, based on the cross validation. It is more superior than the gbm model, according to the accuracy comparison. The model is used to make 20 predictions on the test cases. 
+
