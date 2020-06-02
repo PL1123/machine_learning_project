@@ -399,7 +399,7 @@ summary {
 </div>
 <div id="loading-dataset" class="section level4">
 <h4>Loading Dataset</h4>
-<pre class="r"><code>setwd(&quot;D:/R/Practical Machine Learning/Practical-Machine-Learning-Project&quot;)
+<pre class="r"><code>setwd(&quot;D:/R/practical machine learning1/machine_learning_project&quot;)
 train &lt;- read.csv(&#39;./pml-training.csv&#39;, header = TRUE)
 finalpredict_test &lt;- read.csv(&#39;./pml-testing.csv&#39;, header = TRUE)
 #Raw dataset has 160 columns
@@ -408,7 +408,7 @@ dim(train)</code></pre>
 </div>
 <div id="data-partition" class="section level4">
 <h4>Data Partition</h4>
-<p>We need to columns with nonpredictors, NA values, or near zero covariate variables, before we start partition our dataset.</p>
+<p>We need to remove columns with nonpredictors, NA values, or near zero covariate variables, before we start partition our dataset.</p>
 <pre class="r"><code>#Setting a seed 
 set.seed(5847)
 #Removing columns with NA of train dataset
@@ -448,7 +448,7 @@ testing &lt;- train3[-inTrain,]</code></pre>
 <div id="prediction-models" class="section level1">
 <h1>Prediction Models</h1>
 <p>We will use two different prediction models and compare their accuracy to pick the best one (high accuracy, low out of sample error) for prediction. They will be random forest and gbm.</p>
-<p>Cross validation is done with a cv of K = 3</p>
+<p>Cross validation is done with a cv of K = 3; error rate shown below</p>
 <pre class="r"><code>train_control &lt;- trainControl(method = &quot;cv&quot;, number = 3) </code></pre>
 <div id="random-forest-model" class="section level4">
 <h4>Random Forest Model</h4>
@@ -471,7 +471,7 @@ cm_gbm &lt;- confusionMatrix(pred_gbm, testing$classe)
 cm_gbm$overall[1]</code></pre>
 <pre><code>##  Accuracy 
 ## 0.9632953</code></pre>
-<p>Random forest model has a higher accuracy rate than gradient boosting model, so random forest model (99% accuracy) will be used to make prediction for the final testing data.</p>
+<p>Random forest model has a higher accuracy rate than gradient boosting model, so random forest model (99% accuracy) will be used to make prediction for the final testing data.The out of sample error rate is roughly 1%.</p>
 <pre class="r"><code>#Importance of features used to predict
 fit_rf$finalModel$importance</code></pre>
 <pre><code>##                      MeanDecreaseGini
@@ -527,6 +527,23 @@ fit_rf$finalModel$importance</code></pre>
 ## magnet_forearm_x            221.01988
 ## magnet_forearm_y            225.85066
 ## magnet_forearm_z            218.14006</code></pre>
+<pre class="r"><code>#Display final model 
+fit_rf$finalModel</code></pre>
+<pre><code>## 
+## Call:
+##  randomForest(x = x, y = y, ntree = 64, mtry = param$mtry) 
+##                Type of random forest: classification
+##                      Number of trees: 64
+## No. of variables tried at each split: 2
+## 
+##         OOB estimate of  error rate: 1.01%
+## Confusion matrix:
+##      A    B    C    D    E class.error
+## A 4176    7    2    0    0 0.002150538
+## B   27 2801   17    2    1 0.016502809
+## C    3   23 2535    6    0 0.012465914
+## D    2    1   45 2360    4 0.021558872
+## E    1    0    2    5 2698 0.002956393</code></pre>
 </div>
 </div>
 <div id="final-prediction" class="section level1">
