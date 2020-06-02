@@ -34,7 +34,7 @@ finalpredict_test <- read.csv('./pml-testing.csv', header = TRUE)
 dim(train)
 ```
 #### Data Partition 
-We need to columns with nonpredictors, NA values, or near zero covariate variables, before we start partition our dataset.
+We need to remove columns with nonpredictors, NA values, or near zero covariate variables, before we start partition our dataset.
 ```{r}
 #Setting a seed 
 set.seed(5847)
